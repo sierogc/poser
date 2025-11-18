@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distanza e Tempo</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            background-color: black; /* Sfondo nero */
+            color: white; /* Scritta bianca */
+            
+            /* Qui impostiamo il font Old English per tutto il sito */
+            font-family: 'UnifrakturMaguntia', 'Old English Text MT', serif;
+            
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            letter-spacing: 2px; /* Aumenta leggermente la leggibilità */
+        }
+
+        /* Stile per la distanza */
+        #distance {
+            font-size: 3.5rem; /* Leggermente più grande per questo font */
+            margin-bottom: 30px;
+        }
+
+        /* Stile per il timer */
+        #timer {
+            font-size: 2.5rem;
+            color: #d3d3d3; /* Bianco sporco/argento */
+        }
+        
+        /* Stile per quando sta caricando */
+        .loading {
+            font-size: 2rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="distance" class="loading">Calcolo distanza...</div>
+    
+    <div id="timer">Online da: 00:00:00</div>
+
+    <script>
+        // --- 1. LE TUE COORDINATE (Mariglianella, Via Roma 37) ---
+        const MY_LAT = 40.9178; 
+        const MY_LON = 14.4375; 
+
+        // --- 2. GESTIONE DEL TIMER ---
+        let totalSeconds = 0;
+        const timerElement = document.getElementById('timer');
+
+        function updateTimer() {
+            totalSeconds++;
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            const formattedTime = 
+                (hours < 10 ? "0" + hours : hours) + ":" + 
+                (minutes < 10 ? "0" + minutes : minutes) + ":" + 
+                (seconds < 10 ? "0" + seconds : seconds);
+
+            timerElement.textContent = "Online da: " + formattedTime;
+        }
+        setInterval(updateTimer, 1000);
+
+        // --- 3. CALCOLO MATEMATICO ---
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            const d = R * c; 
+            return d;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI/180);
+        }
+
+        // --- 4. LOGICA POSIZIONE ---
+        fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.latitude && data.longitude) {
+                    const dist = calculateDistance(MY_LAT, MY_LON, data.latitude, data.longitude);
+                    
+                    const distanceElem = document.getElementById('distance');
+                    distanceElem.className = ""; 
+                    // Testo aggiornato
+                    distanceElem.textContent = `Sei a ${dist.toFixed(1)} km da me`;
+                } else {
+                    document.getElementById('distance').textContent = "Posizione sconosciuta";
+                }
+            })
+            .catch(error => {
+                console.error('Errore:', error);
+                document.getElementById('distance').textContent = "Errore Calcolo";
+            });
+    </script>
+</body>
+</html>
