@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poser</title>
+    <title>Status Monitor</title>
     <style>
         /* VARIABILE: Dimensione di default per desktop */
         :root {
@@ -47,12 +47,8 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
 
-            /* TRACCIA NERA NITIDA (CONTORNO): NUOVO STILE */
-            text-shadow: 
-                -2px -2px 0 black,  /* Traccia in alto a sinistra */
-                 2px -2px 0 black,  /* Traccia in alto a destra */
-                -2px 2px 0 black,   /* Traccia in basso a sinistra */
-                 2px 2px 0 black;   /* Traccia in basso a destra */
+            /* TRACCIA NERA INTORNO AL TESTO: NUOVO STILE AGGIUNTO */
+            text-shadow: 2px 2px 2px black; /* Ombra per creare l'effetto traccia */
         }
 
         .status-container {
@@ -98,7 +94,7 @@
     <div class="status-container">
         
         <div class="status-line" id="distance-line">
-            <span class="prefix">Ci separano: </span>
+            <span class="prefix">Ci separano </span>
             <span class="value" id="distance">... km</span>
         </div>
         
