@@ -8,17 +8,24 @@
         /* VARIABILE: Dimensione di default per desktop */
         :root {
             --main-font-size: 5.5rem; 
+            /* Larghezza fissa per bilanciare KM e Tempo su desktop */
+            --data-value-width: 350px; 
         }
 
-        /* --- MEDIA QUERY PER RENDERE RESPONSIVE --- */
-        /* Se la larghezza dello schermo è 600px o meno (tipico smartphone) */
-        @media (max-width: 600px) {
+        /* Responsive per smartphone (cambia grandezza e layout) */
+        @media (max-width: 768px) {
             :root {
-                --main-font-size: 3rem; /* Riduzione della dimensione del font */
+                --main-font-size: 2rem; 
+                --data-value-width: 150px; 
             }
-            #distance, #timer {
-                /* Allentiamo leggermente il kerning per una migliore leggibilità su schermi piccoli */
-                letter-spacing: -1px !important; 
+            .status-line {
+                /* Su mobile, passa ad allineamento verticale */
+                flex-direction: column; 
+                line-height: 1.1; 
+            }
+            .prefix, .value {
+                 width: 100% !important;
+                 text-align: left !important;
             }
         }
         
@@ -26,7 +33,7 @@
             height: 100%;
             margin: 0;
             
-            /* GESTIONE SFONDO */
+            /* GESTIONE SFONDO: IMPOSTAZIONE FINALE */
             background-image: url('wallpaper.png'); 
             background-size: cover; 
             background-position: center; 
@@ -35,7 +42,8 @@
             
             /* GESTIONE TESTO */
             color: white; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: Arial, sans-serif; /* Font: Arial Regular */
+            font-weight: 400; 
             
             display: flex;
             flex-direction: column;
@@ -47,25 +55,41 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* RIGA 1: Distanza */
-        #distance {
-            font-size: var(--main-font-size); 
-            font-weight: 700; 
-            letter-spacing: -2px; 
-            margin-bottom: 5px; 
+        .status-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Stile di ogni singola riga (Prefisso + Valore) */
+        .status-line {
+            display: flex; 
+            align-items: baseline;
+            justify-content: center; 
+            margin-bottom: 5px;
+            font-size: var(--main-font-size);
             line-height: 1.1;
+        }
+
+        /* Prefisso (Il testo descrittivo) */
+        .prefix {
+            font-weight: 400; 
+            margin-right: 20px;
+        }
+
+        /* Valore (I dati numerici: KM e Timer) */
+        .value {
+            /* Larghezza fissa per simmetria */
+            width: var(--data-value-width); 
+            min-width: var(--data-value-width); 
+            
+            font-weight: 700; /* Il dato in sé in grassetto */
+            text-align: right; 
+            color: white;
+            /* Numeri monospaced per l'allineamento */
             font-feature-settings: "tnum"; 
         }
 
-        /* RIGA 2: Timer */
-        #timer {
-            font-size: var(--main-font-size);
-            font-weight: 700;
-            letter-spacing: -2px; 
-            font-feature-settings: "tnum";
-            color: white; 
-        }
-        
         .loading {
             color: #666; 
         }
@@ -74,8 +98,17 @@
 <body>
 
     <div class="status-container">
-        <div id="distance" class="loading">... km</div>
-        <div id="timer">00:00:00</div>
+        
+        <div class="status-line" id="distance-line">
+            <span class="prefix">Ci separano </span>
+            <span class="value" id="distance">... km</span>
+        </div>
+        
+        <div class="status-line" id="timer-line">
+            <span class="prefix">Abbiamo passato insieme: </span>
+            <span class="value" id="timer">00:00:00</span>
+        </div>
+        
     </div>
 
     <script>
@@ -84,7 +117,7 @@
         const MY_LON = 14.4375; 
 
         // --- 2. GESTIONE TIMER PERSISTENTE ---
-        const timerElement = document.getElementById('timer');
+        const timerValueElement = document.getElementById('timer');
         let startTime = localStorage.getItem('firstConnectionTime');
 
         if (!startTime) {
@@ -106,7 +139,7 @@
                 (minutes < 10 ? "0" + minutes : minutes) + ":" + 
                 (seconds < 10 ? "0" + seconds : seconds);
 
-            timerElement.textContent = formattedTime;
+            timerValueElement.textContent = formattedTime;
         }
         
         setInterval(updateTimer, 1000);
@@ -131,14 +164,15 @@
         fetch('https://ipapi.co/json/')
             .then(response => response.json())
             .then(data => {
-                const distanceElem = document.getElementById('distance');
+                const distanceValueElement = document.getElementById('distance');
                 if (data.latitude && data.longitude) {
                     const dist = calculateDistance(MY_LAT, MY_LON, data.latitude, data.longitude);
-                    distanceElem.className = ""; 
-                    distanceElem.textContent = `${dist.toFixed(1)} km`;
+                    
+                    document.getElementById('distance-line').className = "status-line";
+                    
+                    distanceValueElement.textContent = `${dist.toFixed(1)} km`;
                 } else {
-                    distanceElem.textContent = "XXX.X km";
-                    distanceElem.className = "loading";
+                    distanceValueElement.textContent = "XXX.X km";
                 }
             })
             .catch(error => {
