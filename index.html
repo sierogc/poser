@@ -3,17 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status</title>
+    <title>Poser</title>
     <style>
+        /* VARIABILE: Dimensione di default per desktop */
+        :root {
+            --main-font-size: 5.5rem; 
+        }
+
+        /* --- MEDIA QUERY PER RENDERE RESPONSIVE --- */
+        /* Se la larghezza dello schermo è 600px o meno (tipico smartphone) */
+        @media (max-width: 600px) {
+            :root {
+                --main-font-size: 3rem; /* Riduzione della dimensione del font */
+            }
+            #distance, #timer {
+                /* Allentiamo leggermente il kerning per una migliore leggibilità su schermi piccoli */
+                letter-spacing: -1px !important; 
+            }
+        }
+        
         body, html {
             height: 100%;
             margin: 0;
-            background-color: black;
-            color: white;
             
-            /* STACK FONT PER SF PRO
-               -apple-system e BlinkMacSystemFont caricano SF Pro su dispositivi Apple.
-               Segoe UI e Roboto sono le alternative per Windows/Android. */
+            /* GESTIONE SFONDO */
+            background-image: url('wallpaper.jpg'); 
+            background-size: cover; 
+            background-position: center; 
+            background-attachment: fixed; 
+            background-color: black; 
+            
+            /* GESTIONE TESTO */
+            color: white; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             
             display: flex;
@@ -22,69 +43,64 @@
             align-items: center;
             text-align: center;
             
-            /* Rende il testo più nitido (stile Apple) */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* RIGA 1: Distanza (Molto grande) */
+        /* RIGA 1: Distanza */
         #distance {
-            font-size: 4.5rem; /* Molto grande */
-            font-weight: 700;  /* Bold in stile SF Pro */
-            letter-spacing: -1px; /* Tipico kerning stretto di Apple */
-            margin-bottom: 10px;
+            font-size: var(--main-font-size); 
+            font-weight: 700; 
+            letter-spacing: -2px; 
+            margin-bottom: 5px; 
             line-height: 1.1;
+            font-feature-settings: "tnum"; 
         }
 
-        /* RIGA 2: Timer (Grande, ma meno della distanza) */
+        /* RIGA 2: Timer */
         #timer {
-            font-size: 2.5rem;
-            font-weight: 400; /* Regular weight */
-            color: #8e8e93;   /* Grigio "Apple system gray" */
-            font-feature-settings: "tnum"; /* Numeri tabulari (non saltano mentre scorrono) */
+            font-size: var(--main-font-size);
+            font-weight: 700;
+            letter-spacing: -2px; 
+            font-feature-settings: "tnum";
+            color: white; 
         }
         
         .loading {
-            color: #333;
+            color: #666; 
         }
     </style>
 </head>
 <body>
 
-    <div id="distance" class="loading">...</div>
-    <div id="timer">00:00:00</div>
+    <div class="status-container">
+        <div id="distance" class="loading">... km</div>
+        <div id="timer">00:00:00</div>
+    </div>
 
     <script>
-        // --- 1. LE TUE COORDINATE (Mariglianella) ---
+        // --- 1. LE TUE COORDINATE (Mariglianella, Via Roma 37) ---
         const MY_LAT = 40.9178; 
         const MY_LON = 14.4375; 
 
-        // --- 2. GESTIONE TIMER "PERSISTENTE" ---
+        // --- 2. GESTIONE TIMER PERSISTENTE ---
         const timerElement = document.getElementById('timer');
-
-        // Cerchiamo se l'utente è già stato qui
         let startTime = localStorage.getItem('firstConnectionTime');
 
         if (!startTime) {
-            // Se è la prima volta assoluta, salviamo l'orario di adesso
             startTime = Date.now();
             localStorage.setItem('firstConnectionTime', startTime);
         } else {
-            // Convertiamo la stringa salvata in numero
             startTime = parseInt(startTime);
         }
 
         function updateTimer() {
-            const now = Date.now();
-            const diff = now - startTime; // Millisecondi passati dalla prima connessione
-
-            // Calcoli matematici
+            const diff = Date.now() - startTime; 
             const totalSeconds = Math.floor(diff / 1000);
             const hours = Math.floor(totalSeconds / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
             const seconds = totalSeconds % 60;
 
-            // Formattazione 00:00:00
             const formattedTime = 
                 (hours < 10 ? "0" + hours : hours) + ":" + 
                 (minutes < 10 ? "0" + minutes : minutes) + ":" + 
@@ -93,11 +109,10 @@
             timerElement.textContent = formattedTime;
         }
         
-        // Aggiornamento ultra-fluido
         setInterval(updateTimer, 1000);
-        updateTimer(); // Esegui subito una volta per non vedere "00:00:00" all'inizio
+        updateTimer(); 
 
-        // --- 3. CALCOLO DISTANZA ---
+        // --- 3. LOGICA CALCOLO DISTANZA ---
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371; 
             const dLat = deg2rad(lat2 - lat1);
@@ -116,16 +131,19 @@
         fetch('https://ipapi.co/json/')
             .then(response => response.json())
             .then(data => {
+                const distanceElem = document.getElementById('distance');
                 if (data.latitude && data.longitude) {
                     const dist = calculateDistance(MY_LAT, MY_LON, data.latitude, data.longitude);
-                    const distanceElem = document.getElementById('distance');
                     distanceElem.className = ""; 
-                    // Solo numero e km, molto pulito
                     distanceElem.textContent = `${dist.toFixed(1)} km`;
+                } else {
+                    distanceElem.textContent = "XXX.X km";
+                    distanceElem.className = "loading";
                 }
             })
             .catch(error => {
                 console.error(error);
+                document.getElementById('distance').textContent = "XXX.X km";
             });
     </script>
 </body>
