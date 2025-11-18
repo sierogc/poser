@@ -14,11 +14,10 @@
         /* Responsive per smartphone: Dimensione e garanzia riga singola */
         @media (max-width: 768px) {
             :root {
-                --main-font-size: 1rem; /* RIDUZIONE MASSIMA PER GARANTIRE SPAZIO */
-                --data-value-width: 90px; /* Larghezza fissa ridotta */
+                --main-font-size: 0.9rem; 
+                --data-value-width: 90px; 
             }
             .status-line {
-                /* FORZA LA RIGA SINGOLA: il contenuto non andrà mai a capo */
                 white-space: nowrap; 
             }
         }
@@ -47,6 +46,13 @@
             
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+
+            /* TRACCIA NERA NITIDA (CONTORNO): NUOVO STILE */
+            text-shadow: 
+                -2px -2px 0 black,  /* Traccia in alto a sinistra */
+                 2px -2px 0 black,  /* Traccia in alto a destra */
+                -2px 2px 0 black,   /* Traccia in basso a sinistra */
+                 2px 2px 0 black;   /* Traccia in basso a destra */
         }
 
         .status-container {
