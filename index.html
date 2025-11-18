@@ -7,25 +7,19 @@
     <style>
         /* VARIABILE: Dimensione di default per desktop */
         :root {
-            --main-font-size: 5.5rem; 
-            /* Larghezza fissa per bilanciare KM e Tempo su desktop */
-            --data-value-width: 350px; 
+            --main-font-size: 3.5rem; 
+            --data-value-width: 250px; 
         }
 
-        /* Responsive per smartphone (cambia grandezza e layout) */
+        /* Responsive per smartphone: Dimensione e garanzia riga singola */
         @media (max-width: 768px) {
             :root {
-                --main-font-size: 2rem; 
-                --data-value-width: 150px; 
+                --main-font-size: 1rem; /* RIDUZIONE MASSIMA PER GARANTIRE SPAZIO */
+                --data-value-width: 90px; /* Larghezza fissa ridotta */
             }
             .status-line {
-                /* Su mobile, passa ad allineamento verticale */
-                flex-direction: column; 
-                line-height: 1.1; 
-            }
-            .prefix, .value {
-                 width: 100% !important;
-                 text-align: left !important;
+                /* FORZA LA RIGA SINGOLA: il contenuto non andrà mai a capo */
+                white-space: nowrap; 
             }
         }
         
@@ -33,7 +27,7 @@
             height: 100%;
             margin: 0;
             
-            /* GESTIONE SFONDO: IMPOSTAZIONE FINALE */
+            /* GESTIONE SFONDO */
             background-image: url('wallpaper.png'); 
             background-size: cover; 
             background-position: center; 
@@ -42,7 +36,7 @@
             
             /* GESTIONE TESTO */
             color: white; 
-            font-family: Arial, sans-serif; /* Font: Arial Regular */
+            font-family: Arial, sans-serif; 
             font-weight: 400; 
             
             display: flex;
@@ -79,14 +73,12 @@
 
         /* Valore (I dati numerici: KM e Timer) */
         .value {
-            /* Larghezza fissa per simmetria */
             width: var(--data-value-width); 
             min-width: var(--data-value-width); 
             
-            font-weight: 700; /* Il dato in sé in grassetto */
+            font-weight: 700; 
             text-align: right; 
             color: white;
-            /* Numeri monospaced per l'allineamento */
             font-feature-settings: "tnum"; 
         }
 
